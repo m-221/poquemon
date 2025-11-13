@@ -1,15 +1,38 @@
 {% extends 'index.html' %}
 {% block contenido%}
 
+{% if pokemon %}
+<div class="card" style="margin: auto;">
+ 
+  <img src="{{ pokemon.sprite }}" class="card-img-top" alt="{{ pokemon.name }}">
 
-<div class="card" style="width: 18rem;">
-  <img src="..." class="card-img-top" alt="...">
   <div class="card-body">
-    <h5 class="card-title">PIKACHU</h5>
-    <p class="card-text"></p>
-    <a href="https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/25.ogg" class="btn btn-primary">.</a>
+    <h5 class="card-title">{{ pokemon.name }}</h5>
+
+    <p class="card-text">
+      <strong>ID:</strong> {{ pokemon.id }}<br>
+      <strong>Altura:</strong> {{ pokemon.height }} m<br>
+      <strong>Peso:</strong> {{ pokemon.weight }} kg
+    </p>
+
+    <p class="card-text">
+      <strong>Tipos:</strong> 
+      {% for tipo in pokemon.types %}
+        {{ tipo }}{% if not loop.last %}, {% endif %}
+      {% endfor %}
+    </p>
+
+    <p class="card-text">
+      <strong>Habilidades:</strong>
+      {% for habilidad in pokemon.abilities %}
+        {{ habilidad }}{% if not loop.last %}, {% endif %}
+      {% endfor %}
+    </p>
+
+    <a href="https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/{{ pokemon.id }}.ogg" class="btn btn-primary mt-2">Escuchar</a>
   </div>
 </div>
-
-
-    {% endblock %}
+{% else %}
+<p>No se encontró Pokémon.</p>
+{% endif %}
+{% endblock %}

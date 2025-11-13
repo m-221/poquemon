@@ -1,13 +1,15 @@
-from flask import Flask,render_template,request,redirect,url_for,flash,jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash
 import requests
+
 API = "https://pokeapi.co/api/v2/pokemon/"
 app = Flask(__name__)
-app.secret_key ='claVe_SeCReTa_My_ClAvE'
+app.secret_key = 'claVe_SeCReTa_My_ClAvE'
 
 
 @app.route('/')
 def index():
     return render_template('inicio.html')
+
 
 @app.route('/pokemon')
 def pokemon():
@@ -16,26 +18,29 @@ def pokemon():
 
 @app.route('/search', methods=['POST'])
 def search_pokemon():
-    pokemon = request.form.get('pkemonn','').strip().lower()
-    
+    pokemon = request.form.get('pokemon', '').strip().lower()  
+
     if not pokemon:
-        flash('por favor,ingresa tu informacion','error')
-        return redirect(url_for('inicio.html'))
-    
-    respuesta= requests.get(f"{API}{pokemon}")
-    
-    if respuesta.status_code == 200:
-        pokemon_data =respuesta.json()
+        flash('Por favor, ingresa tu información', 'error')
+        return redirect(url_for('index'))
+
     try:
-        respuesta requests.get(f"{API}{pokemon_name}")
+        respuesta = requests.get(f"{API}{pokemon}")
         if respuesta.status_code == 200:
             pokemon_data = respuesta.json()
+            formatted_data = format_pokemon_data(pokemon_data)
+            return render_template('pokemon.html', pokemon=formatted_data)
+        else:
+            flash('Pokémon no encontrado. Por favor, intenta de nuevo.', 'error')
+            return redirect(url_for('pokemon'))
 
-        
-        return render_template('pokemon.html')
-    
+    except requests.exceptions.RequestException:
+        flash('Error al conectar con la API. Por favor, intenta de nuevo más tarde.', 'error')
+        return redirect(url_for('index'))
+
+
 def format_pokemon_data(pokemon_data):
-    pokemon_info = {
+    return {
         'name': pokemon_data['name'].title(),
         'id': pokemon_data['id'],
         'height': pokemon_data['height'] / 10,  
@@ -43,18 +48,8 @@ def format_pokemon_data(pokemon_data):
         'sprite': pokemon_data['sprites']['front_default'],
         'types': [t['type']['name'].title() for t in pokemon_data['types']],
         'abilities': [a['ability']['name'].title() for a in pokemon_data['abilities']],
-        'stats': {}
+        'stats': {s['stat']['name']: s['base_stat'] for s in pokemon_data['stats']}
     }
-    return render_template('pokemon.html', pokemon=pokemon_info)
-
-    for stat in pokemon_data['stats']:
-        stat_name = stat['stat']['name']
-        pokemon_info['stats'][stat_name] = stat['base_stat']
-
-    
-
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)
